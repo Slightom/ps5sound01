@@ -37,6 +37,7 @@ export default class HomeScreen extends Component {
         { id: 4, name: 'pulp_fiction_lonesome_town', backgroundColor: defaultColor },
         { id: 5, name: 'halina_benedyk_mamy_po_20_lat', backgroundColor: defaultColor },
         { id: 6, name: 'michal_lorenc_taniec_eleny', backgroundColor: defaultColor },
+        { id: 7, name: 'pulp_fiction_lonesome_town2', backgroundColor: defaultColor },
       ],
       refresh: false,
     }
@@ -45,6 +46,9 @@ export default class HomeScreen extends Component {
   play() {
     actualPlaying.song.play((success) => {
       if (success) {
+        var i = actualPlaying.id + 1;
+        if (i === this.state.data.length) { i = 0; }
+        this.songClicked(null, this.state.data[i].name, i);
         console.log('successfully finished playing');
       } else {
         console.log('playback failed due to audio decoding errors');
@@ -76,10 +80,10 @@ export default class HomeScreen extends Component {
       return;
     }
     else {
-      if(actualPlaying.song !== null){
+      if (actualPlaying.song !== null) {
         actualPlaying.song.stop();
         this.updateBackground(actualPlaying.id, defaultColor);
-      }      
+      }
 
       actualPlaying.isPaused = false;
       actualPlaying.title = name;
