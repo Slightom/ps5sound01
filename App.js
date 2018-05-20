@@ -5,92 +5,127 @@ import {
   Text,
   View,
   Button,
+  FlatList,
+  TouchableOpacity,
+  AppState
 } from 'react-native';
+import { StackNavigator } from 'react-navigation';
 
 
-// Import the react-native-sound module
-var Sound = require('react-native-sound');
 
-// Enable playback in silence mode
-Sound.setCategory('Playback');
+var Sound = require('react-native-sound'); // Import the react-native-sound module
+Sound.setCategory('Playback'); // Enable playback in silence mode
 
-// Load the sound file 'whoosh.mp3' from the app bundle
-// See notes below about preloading sounds within initialization code below.
-var chopin_spring_waltz = new Sound('chopin_spring_waltz.wav', Sound.MAIN_BUNDLE, (error) => {
-  if (error) {
-    console.log('failed to load the sound', error);
-    return;
-  }
-  // loaded successfully
-  console.log('duration in seconds: ' + chopin_spring_waltz.getDuration() + 'number of channels: ' + chopin_spring_waltz.getNumberOfChannels());
-});
+let actualPlaying = {
+  song: null, title: "", isPaused: false, id: -1,
+};
 
 
-export default class App extends Component {
-
-  
-  play(){
-    // Play the sound with an onEnd callback
-  chopin_spring_waltz.play((success) => {
-    if (success) {
-      console.log('successfully finished playing');
-    } else {
-      console.log('playback failed due to audio decoding errors');
-      // reset the player to its uninitialized state (android only)
-      // this is the only option to recover after an error occured and use the player again
-      chopin_spring_waltz.reset();
+export default class HomeScreen extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      data: [
+        { id: 0, name: 'chopin_spring_waltz', backgroundColor: 'powderblue' },
+        { id: 1, name: 'kortez_wracaj_do_domu', backgroundColor: 'powderblue' },
+        { id: 2, name: 'kortez_pierwsza', backgroundColor: 'powderblue' },
+        { id: 3, name: 'krawczyk_nosowska_bezsenni', backgroundColor: 'powderblue' },
+        { id: 4, name: 'pulp_fiction_lonesome_town', backgroundColor: 'powderblue' },
+        { id: 5, name: 'halina_benedyk_mamy_po_20_lat', backgroundColor: 'powderblue' },
+        { id: 6, name: 'michal_lorenc_taniec_eleny', backgroundColor: 'powderblue' },
+      ],
+      refresh: false,
     }
-  });
   }
 
+  play() {
+    actualPlaying.song.play((success) => {
+      if (success) {
+        console.log('successfully finished playing');
+      } else {
+        console.log('playback failed due to audio decoding errors');
+        actualPlaying.song.reset();
+      }
+    });
+  }
+
+  updateBackground(id, color) {
+    var newTable = this.state.data;
+    newTable[id].backgroundColor = color;
+    this.setState({ data: newTable });
+    this.setState({ refresh: !this.state.refresh })
+  }
+
+  songClicked(p1, name, id) {
+
+    if (actualPlaying.title === name) {
+      if (!actualPlaying.isPaused) {
+        actualPlaying.song.pause();
+        actualPlaying.isPaused = true;
+        this.updateBackground(id, 'green');
+      }
+      else {
+        actualPlaying.song.play();
+        actualPlaying.isPaused = false;
+        this.updateBackground(id, 'yellow');
+      }
+      return;
+    }
+    else {
+      if(actualPlaying.song !== null){
+        actualPlaying.song.stop();
+        this.updateBackground(actualPlaying.id, 'powderblue');
+      }
+      
+
+      actualPlaying.isPaused = false;
+      actualPlaying.title = name;
+      actualPlaying.id = id;
+      actualPlaying.song = new Sound(name + '.wav', Sound.MAIN_BUNDLE, (error) => {
+        if (error) {
+          console.log('failed to load the sound', error);
+          return;
+        }
+        this.play();
+      });
+      this.updateBackground(id, 'yellow');
+    }
+  }
+  
   render() {
-
-    // // Reduce the volume by half
-    // chopin_spring_waltz.setVolume(0.5);
-
-    // // Position the sound to the full right in a stereo field
-    // chopin_spring_waltz.setPan(1);
-
-    // // Loop indefinitely until stop() is called
-    // chopin_spring_waltz.setNumberOfLoops(-1);
-
-    // // Get properties of the player instance
-    // console.log('volume: ' + chopin_spring_waltz.getVolume());
-    // console.log('pan: ' + chopin_spring_waltz.getPan());
-    // console.log('loops: ' + chopin_spring_waltz.getNumberOfLoops());
-
-    // // Seek to a specific point in seconds
-    // chopin_spring_waltz.setCurrentTime(2.5);
-
-    // // Get the current playback point in seconds
-    // chopin_spring_waltz.getCurrentTime((seconds) => console.log('at ' + seconds));
-
-    // // Pause the sound
-    // chopin_spring_waltz.pause();
-
-    // // Stop the sound and rewind to the beginning
-    // chopin_spring_waltz.stop(() => {
-    //   // Note: If you want to play a sound after stopping and rewinding it,
-    //   // it is important to call play() in a callback.
-    //   chopin_spring_waltz.play();
-    // });
-
-    // // Release the audio player resource
-    // chopin_spring_waltz.release();
-
     return (
       <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Button title='play' onPress={() => this.play()}/>
-        <Text style={styles.instructions}>
-          To get started, edit App.js
-        </Text>
+        <FlatList
+          data={this.state.data}
+          extraData={this.state.refresh}
+          renderItem={({ item }) =>
+            <View >
+              <TouchableOpacity onPress={() => this.songClicked(this, item.name, item.id)} style={styles.songItem}>
+                <View style={{ backgroundColor: this.state.data[item.id].backgroundColor, alignItems: 'center' }}>
+                  <Text style={styles.item}>{item.name}</Text>
+                </View>
+              </TouchableOpacity>
+            </View>
+          }
+        />
       </View>
     );
   }
 }
+
+AppState.addEventListener('change', state => {
+  if (state === 'active') {
+    console.log("active");
+    //actualPlayingSong.stop();
+  } else if (state === 'background') {
+    console.log("background");
+    //actualPlayingSong.stop();
+
+  } else if (state === 'inactive') {
+    console.log("inactive");
+    //actualPlayingSong.stop();
+  }
+});
 
 const styles = StyleSheet.create({
   container: {
@@ -98,7 +133,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     //backgroundColor: '#F5FCFF',
-    backgroundColor: 'yellow',
+    //backgroundColor: 'yellow',
+    backgroundColor: 'powderblue',
   },
   welcome: {
     fontSize: 20,
@@ -109,5 +145,14 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     color: '#333333',
     marginBottom: 5,
+  },
+  item: {
+    padding: 20,
+    fontSize: 28,
+    height: 120,
+  },
+  songItem: {
+    borderBottomWidth: 1,
+    borderBottomColor: 'gray',
   },
 });

@@ -9,7 +9,9 @@
   "dependencies": {
     "react": "16.3.1",
     "react-native": "0.55.3",
-    "react-native-sound": "^0.10.9"
+    "react-native-sound": "^0.10.9",
+    "react-native-video": "^2.0.0",
+    "react-navigation": "^2.0.0-rc.9"
   },
   "devDependencies": {
     "babel-jest": "22.4.3",
