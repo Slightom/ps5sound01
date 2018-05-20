@@ -16,6 +16,10 @@ import { StackNavigator } from 'react-navigation';
 var Sound = require('react-native-sound'); // Import the react-native-sound module
 Sound.setCategory('Playback'); // Enable playback in silence mode
 
+let defaultColor = 'powderblue';
+let playingColor = 'yellow';
+let pausedColor = 'skyblue';
+
 let actualPlaying = {
   song: null, title: "", isPaused: false, id: -1,
 };
@@ -26,13 +30,13 @@ export default class HomeScreen extends Component {
     super(props);
     this.state = {
       data: [
-        { id: 0, name: 'chopin_spring_waltz', backgroundColor: 'powderblue' },
-        { id: 1, name: 'kortez_wracaj_do_domu', backgroundColor: 'powderblue' },
-        { id: 2, name: 'kortez_pierwsza', backgroundColor: 'powderblue' },
-        { id: 3, name: 'krawczyk_nosowska_bezsenni', backgroundColor: 'powderblue' },
-        { id: 4, name: 'pulp_fiction_lonesome_town', backgroundColor: 'powderblue' },
-        { id: 5, name: 'halina_benedyk_mamy_po_20_lat', backgroundColor: 'powderblue' },
-        { id: 6, name: 'michal_lorenc_taniec_eleny', backgroundColor: 'powderblue' },
+        { id: 0, name: 'chopin_spring_waltz', backgroundColor: defaultColor },
+        { id: 1, name: 'kortez_wracaj_do_domu', backgroundColor: defaultColor },
+        { id: 2, name: 'kortez_pierwsza', backgroundColor: defaultColor },
+        { id: 3, name: 'krawczyk_nosowska_bezsenni', backgroundColor: defaultColor },
+        { id: 4, name: 'pulp_fiction_lonesome_town', backgroundColor: defaultColor },
+        { id: 5, name: 'halina_benedyk_mamy_po_20_lat', backgroundColor: defaultColor },
+        { id: 6, name: 'michal_lorenc_taniec_eleny', backgroundColor: defaultColor },
       ],
       refresh: false,
     }
@@ -62,21 +66,20 @@ export default class HomeScreen extends Component {
       if (!actualPlaying.isPaused) {
         actualPlaying.song.pause();
         actualPlaying.isPaused = true;
-        this.updateBackground(id, 'green');
+        this.updateBackground(id, pausedColor);
       }
       else {
         actualPlaying.song.play();
         actualPlaying.isPaused = false;
-        this.updateBackground(id, 'yellow');
+        this.updateBackground(id, playingColor);
       }
       return;
     }
     else {
       if(actualPlaying.song !== null){
         actualPlaying.song.stop();
-        this.updateBackground(actualPlaying.id, 'powderblue');
-      }
-      
+        this.updateBackground(actualPlaying.id, defaultColor);
+      }      
 
       actualPlaying.isPaused = false;
       actualPlaying.title = name;
@@ -88,10 +91,10 @@ export default class HomeScreen extends Component {
         }
         this.play();
       });
-      this.updateBackground(id, 'yellow');
+      this.updateBackground(id, playingColor);
     }
   }
-  
+
   render() {
     return (
       <View style={styles.container}>
@@ -133,8 +136,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     //backgroundColor: '#F5FCFF',
-    //backgroundColor: 'yellow',
-    backgroundColor: 'powderblue',
+    //backgroundColor: playingColor,
+    backgroundColor: defaultColor,
   },
   welcome: {
     fontSize: 20,
